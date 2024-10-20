@@ -146,6 +146,14 @@ plt.ylabel('Densidad')
 plt.legend()
 st.pyplot(plt)
 
+# Matriz de Correlación de Características
+st.write("### Matriz de Correlación de Características")
+corr_matrix = train_df[['text_length', 'target']].corr()
+plt.figure(figsize=(6, 4))
+sns.heatmap(corr_matrix, annot=True, cmap='Blues')
+plt.title("Correlación entre Longitud de Texto y Clasificación")
+st.pyplot(plt)
+
 # Tarjetas de estadísticas básicas
 st.write("### Estadísticas Generales del Dataset")
 col1, col2, col3 = st.columns(3)
