@@ -8,6 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, classification_report
+from wordcloud import WordCloud
 
 # Configura el tema estético del dashboard
 st.set_page_config(page_title="Análisis de Tweets", layout="wide", initial_sidebar_state="expanded")
@@ -74,17 +75,42 @@ if model_selection:
             st.write(confusion_matrix(y_test, rf_pred))
             st.write(classification_report(y_test, rf_pred))
 
-# Gráficos: Distribución de la longitud del texto y su clasificación
+# Gráfico de barras para mostrar frecuencia de tweets sobre desastres
+st.write("### Frecuencia de Tweets por Clasificación (Desastre vs No Desastre)")
+plt.figure(figsize=(10, 6))
+sns.countplot(x='target', data=train_df, palette=['#A3CEF1', '#274C77'])
+plt.title("Frecuencia de Tweets Clasificados como Desastre vs No Desastre")
+plt.xlabel("Clasificación")
+plt.ylabel("Cantidad de Tweets")
+st.pyplot(plt)
+
+# Gráfico circular (pie chart) para proporción de tweets
+st.write("### Proporción de Tweets por Clasificación")
+labels = ['No Desastre', 'Desastre']
+sizes = [train_df['target'].value_counts()[0], train_df['target'].value_counts()[1]]
+colors = ['#A3CEF1', '#274C77']
+plt.figure(figsize=(6, 6))
+plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=90)
+plt.axis('equal')  # Asegura que el pie chart sea un círculo
+st.pyplot(plt)
+
+# Nube de palabras para palabras clave más frecuentes asociadas a desastres
+st.write("### Nube de Palabras de Keywords Relacionadas con Desastres")
+disaster_keywords = train_df[train_df['target'] == 1]['keyword'].dropna().tolist()
+disaster_text = ' '.join(disaster_keywords)
+wordcloud = WordCloud(width=800, height=400, background_color='white', colormap='Blues').generate(disaster_text)
+
+plt.figure(figsize=(10, 6))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')  # Eliminar ejes para mejorar la visualización
+st.pyplot(plt)
+
+# Gráficos existentes:
+# Gráficos de longitud de tweet por clasificación
 st.write("### Distribución de Longitud de Tweets por Clasificación")
 train_df['text_length'] = train_df['text'].str.len()
 plt.figure(figsize=(10, 6))
 sns.violinplot(x='target', y='text_length', data=train_df, palette=['#E7ECEF', '#274C77'])
-st.pyplot(plt)
-
-# Gráfico de dispersión para mostrar la longitud del tweet vs clasificación
-st.write("### Relación entre Longitud del Tweet y Clasificación")
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x='text_length', y='target', data=train_df, hue='target', palette=['#6096BA', '#A3CEF1'])
 st.pyplot(plt)
 
 # Heatmap: Frecuencia de keywords
@@ -92,6 +118,32 @@ st.write("### Frecuencia de Keywords Principales")
 keyword_counts = train_df['keyword'].value_counts().head(20)
 plt.figure(figsize=(10, 8))
 sns.heatmap(keyword_counts.to_frame().T, annot=True, cmap='Blues')
+st.pyplot(plt)
+
+# Crear la columna text_length si aún no existe
+train_df['text_length'] = train_df['text'].str.len()
+
+# Verificar que la columna text_length esté correctamente creada
+st.write(train_df[['text', 'text_length']].head())  # Verifica que 'text_length' esté bien creada
+
+# Gráfico de Caja (Boxplot) para Identificar Outliers
+st.write("### Boxplot de Longitud de Tweets por Clasificación")
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='target', y='text_length', data=train_df, palette=['#6096BA', '#A3CEF1'])
+plt.title('Distribución de Longitud de Tweets por Clasificación')
+plt.xlabel('Clasificación (0: No Desastre, 1: Desastre)')
+plt.ylabel('Longitud del Tweet')
+st.pyplot(plt)
+
+# Gráfico de Densidad (KDE) para Longitud de Tweets
+st.write("### Gráfico de Densidad (KDE) para Longitud de Tweets")
+plt.figure(figsize=(10, 6))
+sns.kdeplot(train_df[train_df['target'] == 0]['text_length'], label='No Desastre', shade=True, color='#A3CEF1')
+sns.kdeplot(train_df[train_df['target'] == 1]['text_length'], label='Desastre', shade=True, color='#274C77')
+plt.title("Densidad de Longitud de Tweets por Clasificación")
+plt.xlabel('Longitud del Tweet')
+plt.ylabel('Densidad')
+plt.legend()
 st.pyplot(plt)
 
 # Tarjetas de estadísticas básicas
