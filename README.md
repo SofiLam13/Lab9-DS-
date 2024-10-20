@@ -21,13 +21,15 @@ git clone https://github.com/SofiLam13/Lab9-DS-
 ### Instalar dependencias
 Usando pip:
 ```bash
-pip install streamlit
+pip install -r requirements.txt
 ```
 
 ### Ejecutar la aplicación
 Inicie la aplicación en modo de desarrollo:
 ```bash
 streamlit run lab9.py
-
 ```
 La aplicación debería estar ejecutándose en `http://localhost:8501`. Abra esta URL en su navegador para acceder al Dashboard.
+
+## Deploy
+El deploy del dashboard puede ser visualizado [acá](https://ds-lab-09-deploy.streamlit.app)
